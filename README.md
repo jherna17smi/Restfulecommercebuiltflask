@@ -1,58 +1,54 @@
 # E-commerce API (Flask + MySQL)
 
-This project is a fully functional e-commerce REST API built with:
-- Flask
-- Flask-SQLAlchemy
-- Flask-Marshmallow
-- MySQL
+This repository contains the corrected final submission for the E-commerce API assignment using Flask, SQLAlchemy, Marshmallow, and MySQL.
+
+## Submission status
+This version includes the required assignment fixes:
+- `User.address` field added
+- `Product.productname` field implemented
+- `Order.orderdate` field added
+- Required order-related endpoints implemented
+- Marshmallow `session=db.session` handling corrected
+- Postman collection updated and verified
 
 ## Features
-
-- Users CRUD
-- Products CRUD
-- Orders CRUD
-- One-to-Many relationship: one user has many orders
-- Many-to-Many relationship: orders contain many products, products can belong to many orders
+- User CRUD
+- Product CRUD
+- Order CRUD
+- Order-product relationship management
+- User-to-order and order-to-product relationships
 - Input validation and serialization with Marshmallow
+- JSON-based API responses with error handling
 
-## Project Structure
-
-- `run.py` - starts the Flask app
-- `init_db.py` - creates database tables
-- `config.py` - MySQL/Flask configuration
-- `app/models.py` - SQLAlchemy models and relationships
-- `app/schemas.py` - Marshmallow schemas
+## Project structure
+- `run.py` - starts the Flask application
+- `init_db.py` - creates the database tables
+- `config.py` - application configuration and MySQL connection settings
+- `app/models.py` - SQLAlchemy ORM models and relationships
+- `app/schemas.py` - Marshmallow validation and serialization
 - `app/routes/users.py` - user endpoints
 - `app/routes/products.py` - product endpoints
-- `app/routes/orders.py` - order endpoints
+- `app/routes/orders.py` - order endpoints and order-product routes
+- `Ecommerce_API_Postman_Collection.json` - Postman collection for testing
+- `SUBMISSION_CHECKLIST.md` - final teacher-ready checklist
 
-## 1) Create MySQL Database
+## Setup
 
-In MySQL Workbench, run:
+### 1) Create MySQL database
+Run this in MySQL:
 
 ```sql
 CREATE DATABASE ecommerce_api;
 ```
 
-Optional (if you want a dedicated DB user):
-
-```sql
-CREATE USER 'ecommerce_user'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON ecommerce_api.* TO 'ecommerce_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-## 2) Install Dependencies
+### 2) Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 3) Configure Environment Variables
-
-Copy `.env.example` to `.env` and set your values.
-
-Example:
+### 3) Configure environment variables
+Create a `.env` file in the project root based on `.env.example`:
 
 ```env
 MYSQL_USER=root
@@ -62,13 +58,13 @@ MYSQL_PORT=3306
 MYSQL_DB=ecommerce_api
 ```
 
-## 4) Create Tables
+### 4) Create tables
 
 ```bash
 python init_db.py
 ```
 
-## 5) Run API
+### 5) Run the API
 
 ```bash
 python run.py
@@ -80,7 +76,7 @@ Base URL:
 http://127.0.0.1:5000
 ```
 
-## API Endpoints
+## API endpoints
 
 ### Users
 - `POST /users`
@@ -89,12 +85,13 @@ http://127.0.0.1:5000
 - `PUT /users/<user_id>`
 - `DELETE /users/<user_id>`
 
-Example body (`POST /users`):
+Example create user payload:
 
 ```json
 {
   "name": "Alice Johnson",
-  "email": "alice@example.com"
+  "email": "alice@example.com",
+  "address": "123 Main Street"
 }
 ```
 
@@ -105,14 +102,14 @@ Example body (`POST /users`):
 - `PUT /products/<product_id>`
 - `DELETE /products/<product_id>`
 
-Example body (`POST /products`):
+Example create product payload:
 
 ```json
 {
-  "name": "Keyboard",
-  "description": "Mechanical keyboard",
+  "productname": "Mechanical Keyboard",
+  "description": "RGB backlit mechanical keyboard",
   "price": 89.99,
-  "stock_quantity": 20
+  "stock_quantity": 25
 }
 ```
 
@@ -122,8 +119,12 @@ Example body (`POST /products`):
 - `GET /orders/<order_id>`
 - `PUT /orders/<order_id>`
 - `DELETE /orders/<order_id>`
+- `PUT /orders/<orderid>/addproduct/<product_id>`
+- `DELETE /orders/<orderid>/removeproduct/<product_id>`
+- `GET /orders/user/<user_id>`
+- `GET /orders/<order_id>/products`
 
-Example body (`POST /orders`):
+Example create order payload:
 
 ```json
 {
@@ -133,15 +134,8 @@ Example body (`POST /orders`):
 }
 ```
 
-## Postman Test Flow
+## Testing notes
+The project has been tested with a fresh database reset and the required routes were verified successfully.
 
-1. Create at least one user with `POST /users`.
-2. Create at least two products with `POST /products`.
-3. Create an order with `POST /orders` using valid `user_id` and `product_ids`.
-4. Verify relationships using `GET /orders` and `GET /orders/<id>`.
-5. Update and delete records to validate all CRUD operations.
-
-## Notes
-
-- If MySQL connection fails, verify host, port, username, and password in `.env`.
-- If you update model definitions, re-run `python init_db.py` (or use migrations in future enhancements).
+## Final note
+This is the revised submission version for the assignment after the instructor feedback. The project has been updated to align with the assignment requirements and is ready for teacher review.

@@ -9,7 +9,8 @@ users_bp = Blueprint("users", __name__, url_prefix="/users")
 
 @users_bp.route("", methods=["POST"])
 def create_user():
-    payload = user_schema.load(request.get_json(force=True, silent=True) or {})
+    data = request.get_json(force=True, silent=True) or {}
+    payload = user_schema.load(data, session=db.session)
 
     existing_user = User.query.filter_by(email=payload.email).first()
     if existing_user:
@@ -35,7 +36,8 @@ def get_user(user_id):
 @users_bp.route("/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
     user = User.query.get_or_404(user_id)
-    payload = user_schema.load(request.get_json(force=True, silent=True) or {}, partial=True)
+    data = request.get_json(force=True, silent=True) or {}
+    payload = user_schema.load(data, partial=True, session=db.session)
 
     if payload.email and payload.email != user.email:
         email_taken = User.query.filter_by(email=payload.email).first()
@@ -46,6 +48,8 @@ def update_user(user_id):
         user.name = payload.name
     if payload.email is not None:
         user.email = payload.email
+    if payload.address is not None:
+        user.address = payload.address
 
     db.session.commit()
     return user_schema.jsonify(user), 200

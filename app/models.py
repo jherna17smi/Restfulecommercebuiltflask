@@ -16,6 +16,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    address = db.Column(db.String(255), nullable=False, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     orders = db.relationship(
@@ -30,11 +31,19 @@ class Product(db.Model):
     __tablename__ = "products"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
+    productname = db.Column("productname", db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     stock_quantity = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    @property
+    def name(self):
+        return self.productname
+
+    @name.setter
+    def name(self, value):
+        self.productname = value
 
     orders = db.relationship(
         "Order",
@@ -50,7 +59,15 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="pending")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    orderdate = db.Column("orderdate", db.DateTime, default=datetime.utcnow, nullable=False)
+
+    @property
+    def created_at(self):
+        return self.orderdate
+
+    @created_at.setter
+    def created_at(self, value):
+        self.orderdate = value
 
     user = db.relationship("User", back_populates="orders")
     products = db.relationship(

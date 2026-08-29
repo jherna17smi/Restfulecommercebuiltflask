@@ -9,7 +9,10 @@ products_bp = Blueprint("products", __name__, url_prefix="/products")
 
 @products_bp.route("", methods=["POST"])
 def create_product():
-    payload = product_schema.load(request.get_json(force=True, silent=True) or {})
+    data = request.get_json(force=True, silent=True) or {}
+    if "productname" not in data and "name" in data:
+        data["productname"] = data.pop("name")
+    payload = product_schema.load(data, session=db.session)
     db.session.add(payload)
     db.session.commit()
     return product_schema.jsonify(payload), 201
@@ -30,10 +33,13 @@ def get_product(product_id):
 @products_bp.route("/<int:product_id>", methods=["PUT"])
 def update_product(product_id):
     product = Product.query.get_or_404(product_id)
-    payload = product_schema.load(request.get_json(force=True, silent=True) or {}, partial=True)
+    data = request.get_json(force=True, silent=True) or {}
+    if "productname" not in data and "name" in data:
+        data["productname"] = data.pop("name")
+    payload = product_schema.load(data, partial=True, session=db.session)
 
-    if payload.name is not None:
-        product.name = payload.name
+    if payload.productname is not None:
+        product.productname = payload.productname
     if payload.description is not None:
         product.description = payload.description
     if payload.price is not None:

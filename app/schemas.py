@@ -9,10 +9,12 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         model = User
         load_instance = True
         include_fk = True
+        include_relationships = True
 
     id = fields.Integer(dump_only=True)
     name = fields.String(required=True, validate=validate.Length(min=2, max=120))
     email = fields.Email(required=True)
+    address = fields.String(required=True, validate=validate.Length(min=2, max=255))
     created_at = fields.DateTime(dump_only=True)
 
 
@@ -21,9 +23,10 @@ class ProductSchema(ma.SQLAlchemyAutoSchema):
         model = Product
         load_instance = True
         include_fk = True
+        include_relationships = True
 
     id = fields.Integer(dump_only=True)
-    name = fields.String(required=True, validate=validate.Length(min=2, max=120))
+    productname = fields.String(required=True, validate=validate.Length(min=2, max=120))
     description = fields.String(allow_none=True)
     price = fields.Float(required=True, validate=validate.Range(min=0))
     stock_quantity = fields.Integer(required=True, validate=validate.Range(min=0))
@@ -53,13 +56,15 @@ class OrderResponseSchema(ma.SQLAlchemyAutoSchema):
         model = Order
         load_instance = True
         include_fk = True
+        include_relationships = True
 
     id = fields.Integer(dump_only=True)
     status = fields.String()
-    created_at = fields.DateTime(dump_only=True)
-    user = fields.Nested(UserSchema(only=("id", "name", "email")))
+    orderdate = fields.DateTime(dump_only=True)
+    created_at = fields.DateTime(dump_only=True, attribute="orderdate")
+    user = fields.Nested(UserSchema(only=("id", "name", "email", "address")))
     products = fields.List(
-        fields.Nested(ProductSchema(only=("id", "name", "price", "stock_quantity")))
+        fields.Nested(ProductSchema(only=("id", "productname", "price", "stock_quantity")))
     )
     total_amount = fields.Method("get_total_amount")
 

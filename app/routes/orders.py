@@ -2,7 +2,12 @@ from flask import Blueprint, jsonify, request
 
 from app.extensions import db
 from app.models import Order, Product, User
-from app.schemas import order_response_schema, order_write_schema, orders_response_schema
+from app.schemas import (
+    order_response_schema,
+    order_write_schema,
+    orders_response_schema,
+    products_schema,
+)
 
 orders_bp = Blueprint("orders", __name__, url_prefix="/orders")
 
@@ -42,10 +47,23 @@ def list_orders():
     return orders_response_schema.jsonify(orders), 200
 
 
+@orders_bp.route("/user/<int:user_id>", methods=["GET"])
+def get_orders_by_user(user_id):
+    user = User.query.get_or_404(user_id)
+    orders = Order.query.filter_by(user_id=user.id).order_by(Order.id.asc()).all()
+    return orders_response_schema.jsonify(orders), 200
+
+
 @orders_bp.route("/<int:order_id>", methods=["GET"])
 def get_order(order_id):
     order = Order.query.get_or_404(order_id)
     return order_response_schema.jsonify(order), 200
+
+
+@orders_bp.route("/<int:order_id>/products", methods=["GET"])
+def get_order_products(order_id):
+    order = Order.query.get_or_404(order_id)
+    return products_schema.jsonify(order.products), 200
 
 
 @orders_bp.route("/<int:order_id>", methods=["PUT"])
@@ -74,6 +92,26 @@ def update_order(order_id):
 
     db.session.commit()
     return order_response_schema.jsonify(order), 200
+
+
+@orders_bp.route("/<int:order_id>/addproduct/<int:product_id>", methods=["PUT"])
+def add_product_to_order(order_id, product_id):
+    order = Order.query.get_or_404(order_id)
+    product = Product.query.get_or_404(product_id)
+    if product not in order.products:
+        order.products.append(product)
+        db.session.commit()
+    return order_response_schema.jsonify(order), 200
+
+
+@orders_bp.route("/<int:order_id>/removeproduct/<int:product_id>", methods=["DELETE"])
+def remove_product_from_order(order_id, product_id):
+    order = Order.query.get_or_404(order_id)
+    product = Product.query.get_or_404(product_id)
+    if product in order.products:
+        order.products.remove(product)
+        db.session.commit()
+    return jsonify({"message": f"Product {product_id} removed from order {order_id}."}), 200
 
 
 @orders_bp.route("/<int:order_id>", methods=["DELETE"])
